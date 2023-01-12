@@ -104,8 +104,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-sm-8">
-                  {{addProduct}}
+                <div class="col-sm-8">               
                   <div class="mb-3">
                     <label for="title" class="form-label" >標題</label>
                     <input id="title" type="text" v-model="addProduct.title" class="form-control" placeholder="請輸入標題">
@@ -126,11 +125,11 @@
                   <div class="row">
                     <div class="mb-3 col-md-6">
                       <label for="origin_price" class="form-label">原價</label>
-                      <input id="origin_price" type="number"  v-model="addProduct.origin_price" min="0" class="form-control" placeholder="請輸入原價">
+                      <input id="origin_price" type="number"  v-model.number="addProduct.origin_price" min="0" class="form-control" placeholder="請輸入原價">
                     </div>
                     <div class="mb-3 col-md-6">
                       <label for="price" class="form-label">售價</label>
-                      <input id="price" type="number" min="0" v-model="addProduct.price" class="form-control"
+                      <input id="price" type="number" min="0" v-model.number="addProduct.price" class="form-control"
                              placeholder="請輸入售價">
                     </div>
                   </div>
@@ -187,7 +186,7 @@
               <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                 取消
               </button>
-              <button type="button" class="btn btn-danger">
+              <button type="button" class="btn btn-danger" @click="removeBtn(item)">
                 確認刪除
               </button>
             </div>
@@ -210,11 +209,12 @@
     <script>
       const url = "https://vue3-course-api.hexschool.io/v2";
       const path="ssozr"
-      
+      let myDelProductModal = ""
       let myProductModal = ""
       const app = {
         data(){
           return{
+            removeId:"",
             imagesBtn:true,
             addImagesUrl:"",
             data:[],
@@ -313,13 +313,20 @@
               
           },
           removeProduct(item){
-            console.log(item.id)
-            const id = item.id
+            this.removeId = item.id 
+            myDelProductModal.show()
+            
+            
+          },
+          removeBtn(item){
+            
+            const id = this.removeId
             axios.delete(`${url}/api/${path}/admin/product/${id}`)
             .then((res)=>{
               console.log(res)
               this.getData()
               alert("刪除成功")
+              myDelProductModal.hide()
             })
             .catch((err)=>{
               console.log(err)
@@ -336,6 +343,10 @@
           addImagesBtn(){
             if(this.addImagesUrl !== ""){
               this.imagesBtn = false
+              if(this.addProduct.imagesUrl.length > 4 ){
+                alert("額外圖片最多四張")
+                return
+              }
               this.addProduct.imagesUrl.push(this.addImagesUrl)
               this.addImagesUrl="";
             }
@@ -350,6 +361,7 @@
           axios.defaults.headers.common['Authorization'] = token;
           this.checkLogin()
           myProductModal = new bootstrap.Modal(document.querySelector("#productModal"))
+          myDelProductModal = new bootstrap.Modal(document.querySelector("#delProductModal"))
 	      }
       }
 
