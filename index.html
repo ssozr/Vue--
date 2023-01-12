@@ -47,8 +47,8 @@
               <td class="text-end">{{item.origin_price}}</td>
               <td class="text-end">{{item.price}}</td>
               <td>
-                <span class="text-success">啟用</span>
-                <span>未啟用</span>
+                <span class="text-success" v-if="item.is_enabled">啟用</span>
+                <span v-else>未啟用</span>
               </td>
               <td>
                 <div class="btn-group">
@@ -87,15 +87,21 @@
                     <img class="img-fluid" :src="addProduct.imageUrl" alt="">
                   </div>
                   <div>
-                    <button class="btn btn-outline-primary btn-sm d-block w-100">
-                      新增圖片
-                    </button>
-                    
-                  </div>
-                  <div v-else>
-                    <button class="btn btn-outline-danger btn-sm d-block w-100">
-                      刪除圖片
-                    </button>
+                    <div>
+                      <img :src="addImagesUrl" alt="" >
+                      <input type="text" class="w-100 mb-1" v-model="addImagesUrl">
+                      <button class="btn btn-outline-primary btn-sm d-block w-100" @click="addImagesBtn()">
+                        新增圖片
+                      </button>
+                    </div>
+                    <div v-if="!imagesBtn">
+                      <div v-for="(image,index) in addProduct.imagesUrl" :key="index">
+                        <img :src="addProduct.imagesUrl[index]" alt="" >
+                        <button class="btn btn-outline-danger btn-sm d-block w-100" @click="removeImagesBtn(index)">
+                          刪除圖片
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div class="col-sm-8">
@@ -153,7 +159,7 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="cancelModel">
                 取消
               </button>
               <button type="button" class="btn btn-primary" @click="addEnter">
@@ -209,6 +215,8 @@
       const app = {
         data(){
           return{
+            imagesBtn:true,
+            addImagesUrl:"",
             data:[],
             productId:"",
             addProduct:{
@@ -237,6 +245,8 @@
             })
             .catch((err)=>{
               console.log(err)
+              alert("請重新登入")
+              window.location = 'login.html';
             })
           },
           getData(){
@@ -252,27 +262,36 @@
           addModalBtn(){
             myProductModal.show()
           },
+          cancelModel(){
+            myProductModal.hide()
+          },
           addEnter(){
               if(this.productId !== ""){
-                axios.put(`${url}/api/${path}/admin/product/${this.productId}`)
+                const product = {...this.addProduct}
+                axios.put(`${url}/api/${path}/admin/product/${this.productId}`,{ data: product})
                 .then((res)=>{
                   console.log(res)
                   alert("修改完成")
+                  this.getData()
+                  myProductModal.hide()
                 })
                 .catch((err)=>{
                   console.dir(err)
+                  alert(err.data.message)
                 })
               }else{
                 const product = {...this.addProduct}
                 axios.post(`${url}/api/${path}/admin/product`,  { data: product })
               .then((res)=>{
                 console.log(res)
+                alert("新增成功")
                 this.getData()
                 myProductModal.hide()
                 
               })
               .catch((err)=>{
                 console.log(err)
+                alert(err.data.message)
             })
               }
               this.productId="";
@@ -313,6 +332,17 @@
             this.productId = item.id
             console.log(this.productId)
             myProductModal.show()
+          },
+          addImagesBtn(){
+            if(this.addImagesUrl !== ""){
+              this.imagesBtn = false
+              this.addProduct.imagesUrl.push(this.addImagesUrl)
+              this.addImagesUrl="";
+            }
+          },
+          removeImagesBtn(index){
+            console.log(index)
+            this.addProduct.imagesUrl.splice(index,1)
           }
         },
         mounted(){  
