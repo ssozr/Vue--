@@ -62,7 +62,12 @@
               </td>
             </tr>
           </tbody>
+          
         </table>
+        <pagination
+        :pages="page"
+        :get-data = "getData"
+        ></pagination>
       </div>
       <!-- Modal -->
       <div id="productModal" ref="productModal" class="modal fade" tabindex="-1" aria-labelledby="productModalLabel"
@@ -206,7 +211,8 @@
             integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc"
             crossorigin="anonymous"></script>
 
-    <script>
+    <script type="module">
+      import pagination from'./pagination.js';
       const url = "https://vue3-course-api.hexschool.io/v2";
       const path="ssozr"
       let myDelProductModal = ""
@@ -214,6 +220,7 @@
       const app = {
         data(){
           return{
+            page:{},
             removeId:"",
             imagesBtn:true,
             addImagesUrl:"",
@@ -236,6 +243,9 @@
             
           }
         },
+        components:{
+          pagination
+        },
         methods:{
           checkLogin(){
             axios.post(`${url}/api/user/check`)
@@ -249,11 +259,12 @@
               window.location = 'login.html';
             })
           },
-          getData(){
-            axios.get(`${url}/api/${path}/admin/products`)
+          getData(page = 1){
+            axios.get(`${url}/api/${path}/admin/products/?page=${page}`)
             .then((res)=>{
-              console.log(res.data.products)
+              console.log(res.data.pagination)
               this.data = res.data.products
+              this.page = res.data.pagination
             })
             .catch((err)=>{
               console.log(err)
