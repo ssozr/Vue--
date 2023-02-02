@@ -16,8 +16,6 @@
         <div class="row justify-content-center">
           <h1 class="h3 mb-3 font-weight-normal">
             請先登入
-            {{username}}
-            {{password}}
           </h1>
           <div class="col-8">
             <form id="form" class="form-signin">
@@ -70,16 +68,16 @@
               username:this.username,
               password:this.password
             }
-            console.log(user)
+            // console.log(user)
             axios.post(`${url}/v2/admin/signin`,user)
             .then((res)=>{
-              console.log(res)
+              // console.log(res)
               const { token, expired } = res.data;
               document.cookie = `ssozrToken=${token}; expires=${new Date(expired)}`;
               window.location = 'index.html';
             })
             .catch((err)=>{
-              console.log(err)
+              // console.log(err)
             })
           }
         }
